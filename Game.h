@@ -1,5 +1,7 @@
 #pragma once
 #include<ctime>
+#include<iostream>
+#include<cstdlib>
 #include<SFML/Graphics.hpp>
 #include<SFML/Network.hpp>
 #include<SFML/System.hpp>
@@ -13,11 +15,17 @@ private:
   sf::RectangleShape top_bar;
   sf::RectangleShape bottom_bar;
   sf::CircleShape ball;
+  sf::Text gameText;
+  sf::FloatRect float_rect;
+  sf::Vector2f ball_velocity;
+  sf::Font font;
   sf::Event event;
   sf::VideoMode video_mode;
+  bool gameState;
   void initVarible();
   void initWindow();
   void shapeInit();
+  void textInit();
 
 public:
   Game();

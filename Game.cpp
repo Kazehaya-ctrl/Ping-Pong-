@@ -2,6 +2,8 @@
 
 void Game::initVarible() {
   this->window = nullptr;
+  this->ball_velocity = sf::Vector2f(3.f, 5.f);
+  this->gameState = true;
 }
 
 void Game::initWindow() {
@@ -9,6 +11,7 @@ void Game::initWindow() {
   this->video_mode.width = 700;
 
   this->window = new sf::RenderWindow(this->video_mode, "Ping-Pong");
+  this->window->setFramerateLimit(60);
 }
 
 void Game::shapeInit() {
@@ -25,10 +28,25 @@ void Game::shapeInit() {
   this->ball.setPosition((this->video_mode.width)/2.0f, (this->video_mode.height)/2.0f);
 }
 
+void Game::textInit() {
+  if(!(this->font.loadFromFile("operius-mono.ttf"))) {
+    std::cout << "Font not loaded" << std::endl;
+  }
+  this->gameText.setFont(this->font);
+  this->gameText.setString("Game Over");
+  this->gameText.setCharacterSize(40);
+  this->gameText.setFillColor(sf::Color::White);
+
+  this->float_rect = this->gameText.getLocalBounds();
+  this->gameText.setOrigin(this->float_rect.width/2.f, this->float_rect.height/2.f);
+  this->gameText.setPosition(this->video_mode.width/2.f, this->video_mode.height/2.f);
+}
+
 Game::Game() {
   this->initVarible();
   this->initWindow();
   this->shapeInit();
+  this->textInit();
 }
 
 Game::~Game() {
@@ -50,25 +68,34 @@ void Game::event_Polling() {
 void Game::bar_update() {
 
   if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left) && this->top_bar.getPosition().x > 0.f) {
-    this->top_bar.move(-8.f, 0.f);
-    this->bottom_bar.move(-8.f, 0.f);
+    this->top_bar.move(-7.f, 0.f);
+    this->bottom_bar.move(-7.f, 0.f);
   }
   if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right) && this->top_bar.getPosition().x < (this->window->getSize().x - this->top_bar.getSize().x)) {
-    this->top_bar.move(8.f, 0.f);
-    this->bottom_bar.move(8.f, 0.f);
+    this->top_bar.move(7.f, 0.f);
+    this->bottom_bar.move(7.f, 0.f);
   }
 }
 
 void Game::ball_update() {
-  float randomX = static_cast<float>(rand() % 5);
-  this->ball.move(randomX, 10.f);
+  this->ball.move(this->ball_velocity.x, this->ball_velocity.y);
 
   if(this->ball.getGlobalBounds().intersects(this->top_bar.getGlobalBounds())) {
-    this->ball.move(randomX, 10.f);
+    this->ball_velocity.y = std::abs(this->ball_velocity.y);
   }
   if(this->ball.getGlobalBounds().intersects(this->bottom_bar.getGlobalBounds())) {
-    this->ball.move(randomX, -10.f);
+    this->ball_velocity.y = -std::abs(this->ball_velocity.y);
+  } 
+  if(this->ball.getPosition().x <= 0.f) {
+    this->ball_velocity.x = std::abs(this->ball_velocity.x);
   }
+  if(this->ball.getPosition().x >= this->window->getSize().x - this->ball.getRadius()) {
+    this->ball_velocity.x = -std::abs(this->ball_velocity.x);
+  }
+  if(this->ball.getPosition().y > this->window->getSize().y - this->ball.getRadius() || this->ball.getPosition().y < 0.f) {
+    this->gameState = false;
+  }
+
 }
 
 void Game::obj_update() {
@@ -90,6 +117,10 @@ void Game::game_update() {
 
 void Game::game_render() {
   this->window->clear();
-  this->render_obj();
+  if(this->gameState) {
+    this->render_obj();
+  } else {
+    this->window->draw(this->gameText);
+  }
   this->window->display();
 }
