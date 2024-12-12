@@ -16,12 +16,14 @@ private:
   sf::RectangleShape bottom_bar;
   sf::CircleShape ball;
   sf::Text gameText;
+  sf::Text pause;
   sf::FloatRect float_rect;
   sf::Vector2f ball_velocity;
   sf::Font font;
   sf::Event event;
   sf::VideoMode video_mode;
   bool gameState;
+  bool wait;
   void initVarible();
   void initWindow();
   void shapeInit();

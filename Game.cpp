@@ -4,6 +4,7 @@ void Game::initVarible() {
   this->window = nullptr;
   this->ball_velocity = sf::Vector2f(3.f, 5.f);
   this->gameState = true;
+  this->wait = false;
 }
 
 void Game::initWindow() {
@@ -40,6 +41,12 @@ void Game::textInit() {
   this->float_rect = this->gameText.getLocalBounds();
   this->gameText.setOrigin(this->float_rect.width/2.f, this->float_rect.height/2.f);
   this->gameText.setPosition(this->video_mode.width/2.f, this->video_mode.height/2.f);
+
+  this->pause.setFont(this->font);
+  this->pause.setString("Paused");
+  this->pause.setCharacterSize(40);
+  this->pause.setFillColor(sf::Color::White);
+  this->pause.setPosition(250.f, 350.f);
 }
 
 Game::Game() {
@@ -62,6 +69,22 @@ void Game::event_Polling() {
     if(this->event.type == sf::Event::Closed) {
       this->window->close();
     }
+
+    if (this->event.type == sf::Event::KeyPressed) {
+      if (this->event.key.code == sf::Keyboard::Escape) {
+        if(!this->gameState) {
+          this->gameState = true;
+
+          this->ball.setPosition(
+            (this->video_mode.width)/2.0f, 
+            (this->video_mode.height)/2.0f
+          );
+          this->ball_velocity = sf::Vector2f(3.f, 5.f);
+        } else {
+          this->wait = !(this->wait);
+        }
+      }
+    } 
   }
 }
 
@@ -99,10 +122,11 @@ void Game::ball_update() {
 }
 
 void Game::obj_update() {
-  this->bar_update();
-  this->ball_update();
+  if(!this->wait) {
+    this->bar_update();
+    this->ball_update();
+  }
 }
-
 
 void Game::render_obj() {
   this->window->draw(this->top_bar);
@@ -118,7 +142,11 @@ void Game::game_update() {
 void Game::game_render() {
   this->window->clear();
   if(this->gameState) {
-    this->render_obj();
+    if(!this->wait) {
+      this->render_obj();
+    } else {
+      this->window->draw(this->pause);
+    }
   } else {
     this->window->draw(this->gameText);
   }
